@@ -29,7 +29,7 @@ df.loc[:,cols2] = df.loc[:,cols2].ffill()
 df.loc[:,cols] = df.loc[:,cols].ffill(axis=1)
 df = df.ffill(axis=1, limit=1)
 
-#Drop un
+#Drop reduntant column
 df.drop(['OECD Country'], axis=1, inplace=True)
 
 
