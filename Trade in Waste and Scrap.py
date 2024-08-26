@@ -4,32 +4,36 @@ Created on Thu Dec 29 12:06:20 2022
 
 @author: Jennifer
 """
-
 import pandas as pd
 
-#Read in data
-df=pd.read_csv(r'C:\\Users\\Jennifer\\Desktop\\Trade in waste and scrap unclean combined.csv')
+# Read the CSV file into a DataFrame
+df = pd.read_csv(r'C:/Users/jenni/OneDrive/Documents/TTU School/Data Science Degree/' \
+                 'Random Data Sets and Tableau/Trade in waste and scrap unclean combined.csv')
 
-#rename columns
+# Display the first few rows to inspect the data structure
+df.head()
+
+# Rename the first three columns for clarity
 df.rename(columns={ df.columns[0]: "OECD Country" }, inplace = True)
 df.rename(columns={ df.columns[2]: "HSCode" }, inplace = True)
 df.rename(columns={ df.columns[1]: "Country" }, inplace = True)
 
-#Create variables for fill
-cols = ['OECD Country']
-cols2= ['Country']
+# Display the updated DataFrame to verify column renaming
+df.head()
 
-#Forward Fill OECD Country and Country to fill in blank data
-df.loc[:,cols] = df.loc[:,cols].ffill()
-df.loc[:,cols2] = df.loc[:,cols2].ffill()
-df.loc[:,cols2] = df.loc[:,cols2].ffill()
-df.loc[:,cols] = df.loc[:,cols].ffill(axis=1)
-df = df.ffill(axis=1, limit=1)
+# Define columns to forward fill vertically to handle missing data
+cols_to_fill = ['OECD Country', 'Country']  # Combine both 'cols' and 'cols2' into one list
 
-#Drop redundant columns
+# Forward fill missing values in 'OECD Country' and 'Country' columns down the rows
+df[cols_to_fill] = df[cols_to_fill].ffill()
+
+# Forward fill missing values across all columns to handle missing data in rows
+df = df.ffill(axis=1)
+
+# Drop the 'OECD Country' column after filling, as it's no longer needed
 df.drop(['OECD Country'], axis=1, inplace=True)
 
-#Rename Date Columns
+# Rename the columns
 df.rename(columns = {'Unnamed: 3':'2003 Exports','Unnamed: 4':'2003 Imports', 
    'Unnamed: 5':'2004 Exports', 'Unnamed: 6':'2004 Imports',
    'Unnamed: 7':'2005 Exports','Unnamed: 8':'2005 Imports',
@@ -45,99 +49,105 @@ df.rename(columns = {'Unnamed: 3':'2003 Exports','Unnamed: 4':'2003 Imports',
    'Unnamed: 27':'2015 Exports','Unnamed: 28':'2015 Imports',
    'Unnamed: 29':'2016 Exports','Unnamed: 30':'2016 Imports'}, inplace = True)
 
-#drop unnecessary rows
-df.drop([0,1,1236,1237], axis=0, inplace=True)
+# Display the updated DataFrame to verify column renaming
+df.head()
 
-#get Country List
+# Drop the first two rows that contain duplicate information
+df.drop([0,1], axis=0, inplace=True)
+
+# Get a list of unique countries
 df.Country.unique()
 
-#remove space in front of countries
+# Remove leading and trailing spaces from the 'Country' column to standardize country names
 df['Country'] = df['Country'].str.strip()
 
-#get HSCode List
-df.HSCode.unique()
-
-#Drop rows where HSCode is not provided. Data is not relevant
-df.drop([342,490,623,640,1008,1130],axis=0,inplace=True)
-
-#Check datatypes
-df.dtypes
-
-#Change HSCode data type to from object to string and then int
-df['HSCode'] = df['HSCode'].astype('string').astype('int32')
-
-#Change Country data type from object to string
-df['Country'] = df['Country'].astype('string')
-
-#Replace .. with 0 to prepare for datatype change
-df= df.replace('..',"0")
-
-#change data type from object to string before changing to float
-df = df.astype({'2003 Imports': "string","2003 Exports": "string", 
-                '2004 Imports': "string","2004 Exports": "string", 
-                '2005 Imports': "string","2005 Exports": "string", 
-                '2006 Imports': "string","2006 Exports": "string",
-                '2007 Imports': "string","2007 Exports": "string", 
-                '2008 Imports': "string","2008 Exports": "string", 
-                '2009 Imports': "string","2009 Exports": "string", 
-                '2010 Exports': "string","2010 Imports": "string",
-                "2011 Exports": "string",'2011 Imports': "string",
-                "2012 Exports": "string",'2012 Imports': "string",
-                "2013 Exports": "string",'2013 Imports': "string",
-                "2014 Exports": "string",'2014 Imports': "string",
-                "2015 Exports": "string",'2015 Imports': "string",
-                "2016 Exports": "string",'2016 Imports': "string"})
-
-#Removed all commas before converting to float
-df = df.replace(',','', regex=True)
-
-#Change to float
-df = df.astype({'2003 Imports': "float","2003 Exports": "float", 
-                '2004 Imports': "float","2004 Exports": "float", 
-                '2005 Imports': "float","2005 Exports": "float", 
-                '2006 Imports': "float","2006 Exports": "float",
-                '2007 Imports': "float","2007 Exports": "float", 
-                '2008 Imports': "float","2008 Exports": "float", 
-                '2009 Imports': "float","2009 Exports": "float", 
-                '2010 Exports': "float","2010 Imports": "float",
-                "2011 Exports": "float",'2011 Imports': "float",
-                "2012 Exports": "float",'2012 Imports': "float",
-                "2013 Exports": "float",'2013 Imports': "float",
-                "2014 Exports": "float",'2014 Imports': "float",
-                "2015 Exports": "float",'2015 Imports': "float",
-                "2016 Exports": "float",'2016 Imports': "float"})  
-    
-#Check datatypes to confirm change
-df.dtypes 
-    
-#Remove HS Codes not relevant
-df=df.loc[(df['HSCode'] > 519999) & (df['HSCode'] < 530000)]
-
-#Rename Countries
+# Standardize country names in the 'Country' column
 df= df.replace('Viet Nam',"Vietnam")
 df= df.replace('Türkiye', 'Turkey')
 df= df.replace('Korea','South Korea')
+df= df.replace("Côte d'Ivoire", "Cote d'Ivoire")
 
-#Reset index
+# Print unique countries for verification
+df.Country.unique()
+
+# Print unique HSCode
+df.HSCode.unique()
+
+# Remove leading and trailing spaces from the 'HSCode' column to standardize values
+df['HSCode'] = df['HSCode'].str.strip()
+
+# Define a list of non-numeric or invalid HSCode values to remove from the DataFrame
+values_to_remove = ['Guyana', 'Chad', 'Andorra', 'Guam', 'Saint Pierre and Miquelon', 'Tonga', 'Zimbabwe']
+
+# Create a Boolean mask for the rows to keep
+mask = ~df['HSCode'].isin(values_to_remove)
+
+# Select all rows except the ones that contain any of the specified values
+df = df[mask]
+
+# Print unique HSCode for verification
+df.HSCode.unique()
+
+# Filter DataFrame to include only relevant HS Codes (between 520000 and 529999)
+# This keeps only yarn, cotton, and man-made fiber products
+df=df.loc[(df['HSCode'] > 519999) & (df['HSCode'] < 530000)]
+
+# Display the current data types of all columns
+df.dtypes
+
+# Convert 'HSCode' from object to string and then to integer for numeric operations
+df['HSCode'] = df['HSCode'].astype('string').astype('int32')
+
+# Convert 'Country' from object to string to ensure consistent text formatting
+df['Country'] = df['Country'].astype('string')
+
+#Replace .. with # Replace '..' with '0' in the DataFrame to prepare for numeric data type conversion
+df= df.replace('..',"0")
+
+# Define the range of years to change the column data types
+years = range(2003, 2017)
+
+# Create a dictionary to change data types to string
+dtype_change = {f'{year} {trade}': 'string' for year in years for trade in ['Imports', 'Exports']}
+
+# Change data types from object to string for all specified columns
+df = df.astype(dtype_change)
+
+# Remove all commas from the DataFrame to prepare for numeric conversion
+df = df.replace(',','', regex=True)
+
+# Define the range of years to consider for data type conversion
+years = range(2003, 2017)
+
+# Create a dictionary to specify columns to convert to float and generate column names
+float_columns = {f'{year} {trade}': 'float' for year in years for trade in ['Imports', 'Exports']}
+
+# Change the data type of the specified columns to float
+df = df.astype(float_columns)
+    
+# Display the current data types of all columns to confirm the changes were successful
+df.dtypes 
+
+# Reset the DataFrame index after filtering and sorting
 df = df.reset_index(drop=True)
 
-#Add HSCodes together
+# Group data by 'Country' and sum the numerical columns to aggregate trade data
 df = df.groupby('Country', as_index=False).sum()
 
-#Drop HSCode, no longer needed
+# Drop the duplicate 'HSCode' column as it is no longer needed after aggregation
 df.drop(['HSCode'], axis=1, inplace=True)
 
-#Make Years a column 
+# Reshape the DataFrame to convert year-specific columns into rows
 df2=df.melt(id_vars=["Country"], 
         var_name="Year", 
         value_name="WeightInTons")
 
-#Separate the Year column into two while splitting the text
+# Split the 'Year' column into 'Year' and 'Type of Shipment' based on space delimiter
 df2[['Year', 'Type of Shipment']] = df2.Year.str.split (" ", expand = True)
 
-#Assign negative values to number of the export type
+# Assign negative values to 'WeightInTons' for 'Exports' to differentiate from 'Imports'
 df2.loc[df2['Type of Shipment'] == 'Exports', 'WeightInTons'] *= -1
 
-#Export to CSV
+# Export the cleaned DataFrame to a CSV file
 df2.to_csv('Trade_in_waste_and_scrap_clean.csv')
 
