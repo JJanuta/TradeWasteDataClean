@@ -8,5 +8,5 @@ Year: Indicates the year of the trade activity, covering exports and imports fro
 Weight in Tons: Specifies the volume of trade in tons. Exported weights are shown as negative numbers, while imported weights are positive.
 Type of Shipment: Identifies whether the trade activity is an export or an import.
 
-Dependencies
+Dependencies:
 Pandas
